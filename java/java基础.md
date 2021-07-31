@@ -61,5 +61,59 @@ java异常机制按继承的层次结构，可以分成两大类Error和Exceptio
 静态内部类只能访问外部类的静态成员变量和静态方法，而非静态内部类由于持有对外部类的引用，可以访问外部类的所用成员
 
 
+## 集合
+
+### Java集合框架中有哪些类？都有什么特点
+
+可以将集合框架大致分为Collection和Map两种
+
+Collection又可以继续分为Set、List、Queue
+
+Set：代表无序、不可重复的集合，常见的类如HashSet、TreeSet。
+
+List:代表有序、可重复的集合，常见的类如动态数组ArrayList、双向链表LinkedList、可变数组Vector
+
+Map：代表具有映射关系的集合，Map遍历起来是无序
+
+Queue:代表一种队列集合。
+
+### ArrayList和LinkList的区别？
+
+ArrayList的底层数据结构是数组，可用索引实现快速查找；是动态数组，相比于数组容量可实现动态增长。
+
+LinkedList的底层结构是链表，增删速度快，是一个双向循环链表，也可以当作堆栈、队列、双端队列
+
+### ArrayList和Vector的区别
+
+ArrayList是非线程安全，建议在单线程的环境下使用，多线程使用Vector或者CopyOnWriteArrayList。默认初始容量为10，每次扩容为原来的1.5倍。
+
+Vector使用了synchronized关键字，是线程安全的,比ArrayList的开销大，访问更慢；默认初始容量为10，每次扩容2倍。可以设置capacityIncrement来控制扩容倍数。
 
 
+### HashSet和TreeSet的区别？
+
+HashSet不能保证排列顺序，使用了Hash算法来存储集合中的元素，有良好的存取和查找性能；通过equal判断两个元素是否相等，并且两个元素的hashCode也相等。
+
+TreeSet是SortedSet接口的实现类，和上面不同，这个是有序的。会根据元素的大小进行排序。采用红黑树的数据结构来存储集合元素；支持两种排序方法（自然排序，定制排序）定制排序通过Comparated接口中的compare（）比较两个元素之间的大小关系
+
+### HashMap和HashTable
+
+ HashMap基于AbstractMap类，实现了Map、Cloneable、Serializable接口；非线程安全。允许存在一个为null的key和任意个为null的value。采用链表散列的结构，数组与链表结合。在1.8后还加入了红黑树结构。初始容量为16,填充因子默认为0.75，扩容时是当前容量的翻倍。
+
+HashTable基于Map接口和Dictionary类；线程安全，开销比HashMap大，如果多线程访问一个Map对象，使用HashTable更好；不允许使用null为key和value；底层是基于哈希表的结构。初始容量为11，填充因子默认为0.75，扩容时容量翻倍+1
+
+### HashMap在put、get元素的过程？体现了什么的数据结构？
+
+* 向HashMap中put元素时，首先判断key是否为空，为空则直接调用putForNullKey(),不为空则计算key的hash值得到该元素的下标值，如果在该位置没有位置处没有元素，就直接保存；如果有，还要比较是否存在相同的key，存在的话就覆盖原来key的value，否则将该元素保存在链头，先保存的在链尾。
+
+* 从Hashmap中get元素时，计算key的hash值找到在数组中的对应的下标值，返回该key对应的value即可，如果有冲突就遍历该位置链表寻找key相同的元素并返回对应的value
+
+### 如何解决hash冲突
+
+* 开放定址法：常见的线性探测方式，在冲突发生时，顺序查看表中下一单元，直到找出一个空单元或查遍全表
+
+* 链地址法：将有冲突数组位置生出链表
+
+* 建立公共溢出区：将哈希表分为基本表和逸出表两部分两部分，和基本表发生冲突的元素一律填入逸出表
+
+* 再哈希表：构造多个不同的hash函数，有冲突使用下一个哈希函数计算哈希值
