@@ -21,7 +21,8 @@ View的测绘流程一直是面试重点，首先我们提出问题。
 ```
     public void handleResumeActivity(IBinder token, boolean finalStateRequest, boolean isForward,
             String reason) {
-
+        final ActivityClientRecord r = performResumeActivity(token, finalStateRequest, reason);
+        //这里回调onResume
         // ...
         if (r.window == null && !a.mFinished && willBeVisible) {
             r.window = r.activity.getWindow();
@@ -52,6 +53,8 @@ View的测绘流程一直是面试重点，首先我们提出问题。
 
     }
 ```
+此处则可以解释第二个问题为什么onCreate ，onResume不能测量宽高，因为此时view还没有开始绘制,甚至还没add进来
+
 注意，此处的decorview中所包含的View是在我们熟悉的onCreate生命周期中的setContentView()传入的。
 
 继续进入addView()。这个方法的实现在WindowmanagerImpl
@@ -108,7 +111,7 @@ View的测绘流程一直是面试重点，首先我们提出问题。
 
 ## ViewRootImpl 浅析
 
-ViewRootImpl 是一个很重要的类，具备以下重要职能。而它的创建时机我们可以从之前的流程中看到是在ActivityThread.handleResumeActivity里
+ViewRootImpl 是一个很重要的类，具备以下重要职能。而它的创建时机我们可以从之前的流程中看到是在ActivityThread.handleResumeActivity里，有如下作用
 
 1、WindowSession将Window添加到WindowManagerService
 
@@ -158,6 +161,7 @@ ViewRootImpl 是一个很重要的类，具备以下重要职能。而它的创�
         }
     }
 ```
+这里我们可以看到我们平时在子线程中做ui操作的罪魁祸首就在这里了。解答了我们的问题4子线程更新UI真的不行吗？答案是可以的只要绕过这个线程检查就好了。
 
 可以看到在进行简单的线程检查后就开始调用scheduleTraversals();在scheduleTraversals()方法中我们发送了一个 __屏障消息__。（此处屏障消息的作用在于让异步消息优先执行。从而使得ViewRootImpl中的UI测量，布局，绘制尽早执行）
 
@@ -194,6 +198,8 @@ performDraw();
 ```
 
 到了这里就开始逐步递归调用我们View的Measure，Layout，Draw方法完成View的绘制
+
+从我们的分析看出
 
 ## 扩展 Choreographer 。
 
